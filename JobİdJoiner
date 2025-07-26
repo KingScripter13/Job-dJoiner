@@ -1,0 +1,189 @@
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+
+local colors = {
+    background = Color3.fromRGB(30,30,40),
+    glass = Color3.fromRGB(255,255,255),
+    accent = Color3.fromRGB(58, 161, 255),
+    text = Color3.fromRGB(230,230,230),
+    error = Color3.fromRGB(220, 60, 60),
+    success = Color3.fromRGB(100, 220, 100),
+    shadow = Color3.new(0,0,0),
+}
+
+if CoreGui:FindFirstChild("MindGoneJobIdJoiner") then
+    CoreGui.MindGoneJobIdJoiner:Destroy()
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MindGoneJobIdJoiner"
+screenGui.Parent = CoreGui
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Blur efekti
+local blur = Instance.new("BlurEffect")
+blur.Name = "MindGoneBlur"
+blur.Size = 20
+blur.Parent = game:GetService("Lighting")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 380, 0, 190)
+frame.Position = UDim2.new(0.5, -190, 0.5, -95)
+frame.BackgroundColor3 = colors.background
+frame.BackgroundTransparency = 0.25
+frame.BorderSizePixel = 0
+frame.ClipsDescendants = true
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Parent = screenGui
+frame.Active = true
+frame.Draggable = true
+
+local gradient = Instance.new("UIGradient", frame)
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,255,255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(180,180,200)),
+}
+gradient.Transparency = NumberSequence.new{
+    NumberSequenceKeypoint.new(0, 0.65),
+    NumberSequenceKeypoint.new(1, 0.85),
+}
+gradient.Rotation = 45
+
+local shadow = Instance.new("ImageLabel")
+shadow.Size = UDim2.new(1, 20, 1, 20)
+shadow.Position = UDim2.new(0, -10, 0, -10)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217" -- soft shadow image
+shadow.ImageColor3 = colors.shadow
+shadow.ImageTransparency = 0.8
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(10,10,118,118)
+shadow.Parent = frame
+shadow.ZIndex = 0
+
+local title = Instance.new("TextLabel")
+title.Text = "🧠 MindGone HUB - JobId Joiner"
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextColor3 = colors.text
+title.Parent = frame
+
+local line = Instance.new("Frame")
+line.Size = UDim2.new(1, -40, 0, 3)
+line.Position = UDim2.new(0, 20, 0, 50)
+line.BackgroundColor3 = colors.accent
+line.BorderSizePixel = 0
+line.Parent = frame
+
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(1, -40, 0, 40)
+textBox.Position = UDim2.new(0, 20, 0, 70)
+textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+textBox.BorderSizePixel = 0
+textBox.TextColor3 = colors.text
+textBox.PlaceholderText = "Enter JobId here..."
+textBox.Font = Enum.Font.Gotham
+textBox.TextSize = 18
+textBox.ClearTextOnFocus = false
+textBox.Parent = frame
+
+local underline = Instance.new("Frame")
+underline.Size = UDim2.new(1, -40, 0, 2)
+underline.Position = UDim2.new(0, 20, 0, 110)
+underline.BackgroundColor3 = colors.accent
+underline.BorderSizePixel = 0
+underline.Parent = frame
+
+local joinButton = Instance.new("TextButton")
+joinButton.Size = UDim2.new(1, -40, 0, 40)
+joinButton.Position = UDim2.new(0, 20, 0, 120)
+joinButton.BackgroundColor3 = colors.accent
+joinButton.BorderSizePixel = 0
+joinButton.Text = "Join Server"
+joinButton.TextColor3 = colors.text
+joinButton.Font = Enum.Font.GothamSemibold
+joinButton.TextSize = 20
+joinButton.Parent = frame
+joinButton.AutoButtonColor = false
+
+joinButton.MouseEnter:Connect(function()
+    TweenService:Create(joinButton, TweenInfo.new(0.25), {BackgroundColor3 = colors.text, TextColor3 = colors.accent}):Play()
+end)
+joinButton.MouseLeave:Connect(function()
+    TweenService:Create(joinButton, TweenInfo.new(0.25), {BackgroundColor3 = colors.accent, TextColor3 = colors.text}):Play()
+end)
+
+local msgLabel = Instance.new("TextLabel")
+msgLabel.Size = UDim2.new(1, -40, 0, 30)
+msgLabel.Position = UDim2.new(0, 20, 0, 165)
+msgLabel.BackgroundTransparency = 1
+msgLabel.Text = ""
+msgLabel.TextColor3 = colors.text
+msgLabel.Font = Enum.Font.GothamSemibold
+msgLabel.TextSize = 16
+msgLabel.TextWrapped = true
+msgLabel.Parent = frame
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 10)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = colors.text
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 24
+closeBtn.Parent = frame
+closeBtn.AutoButtonColor = false
+
+closeBtn.MouseEnter:Connect(function()
+    TweenService:Create(closeBtn, TweenInfo.new(0.2), {TextColor3 = colors.error}):Play()
+end)
+closeBtn.MouseLeave:Connect(function()
+    TweenService:Create(closeBtn, TweenInfo.new(0.2), {TextColor3 = colors.text}):Play()
+end)
+closeBtn.MouseButton1Click:Connect(function()
+    blur:Destroy()
+    screenGui:Destroy()
+end)
+
+local function showMessage(text, color)
+    msgLabel.TextColor3 = color
+    msgLabel.Text = text
+    msgLabel.TextTransparency = 1
+    TweenService:Create(msgLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+    delay(3, function()
+        TweenService:Create(msgLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    end)
+end
+
+joinButton.MouseButton1Click:Connect(function()
+    local jobId = textBox.Text:gsub("%s", "")
+    if jobId == "" then
+        showMessage("⚠️ Please enter a valid JobId!", colors.error)
+        return
+    end
+
+    showMessage("🚀 Teleporting to server...", colors.accent)
+
+    local success, err = pcall(function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, player)
+    end)
+
+    if not success then
+        showMessage("❌ Failed to teleport! Check JobId.", colors.error)
+        warn("Teleport error:", err)
+    end
+end)
+
+screenGui.AncestryChanged:Connect(function(_, parent)
+    if not parent and blur and blur.Parent then
+        blur:Destroy()
+    end
+end)
